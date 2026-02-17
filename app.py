@@ -45,24 +45,33 @@ st.markdown("""
         border-top: 2px solid #000000 !important;
     }
 
-    /* --- BOTÓN CALCULAR (CELESTE Y CENTRADO) --- */
-    .stButton {
+    /* --- BOTÓN CALCULAR (CORREGIDO) --- */
+    /* Centrar el contenedor del botón */
+    div.stButton {
         display: flex;
         justify-content: center;
+        width: 100%;
     }
-    .stButton>button {
+    
+    /* Estilo del botón mismo */
+    div.stButton > button {
         background-color: #3399FF !important; /* Celeste Vibrante */
-        color: white !important; /* Letra Blanca para contraste */
+        color: white !important;
         border-radius: 12px;
         border: none;
         height: 3.5em;
         font-weight: 900 !important; /* Negrita Extra */
         font-size: 18px !important;
-        width: 70% !important; /* Ancho controlado (no ocupa todo, pero es ancho) */
+        
+        /* CORRECCIONES DE ANCHO Y TEXTO */
+        width: 90% !important; /* Ocupa el 90% del ancho (más ancho) */
+        max-width: 500px; /* Tope para que no se vea gigante en PC */
+        white-space: nowrap !important; /* OBLIGA a que el texto esté en una sola línea */
+        
         box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         transition: all 0.3s ease;
     }
-    .stButton>button:hover {
+    div.stButton > button:hover {
         background-color: #1a80e5 !important;
         transform: scale(1.02);
     }
@@ -149,7 +158,7 @@ with col2:
 
 # --- CÁLCULO ---
 st.write("")
-st.write("") # Espacio extra antes del botón
+st.write("") # Espacio extra
 if st.button("CALCULAR MI PLAN"):
     puntaje = mapa_dureza[zona]
     if origen == "Pozo/Napa":
@@ -189,7 +198,6 @@ if st.button("CALCULAR MI PLAN"):
         st.info(d)
         
     if bomba:
-        # MENSAJE CORREGIDO PARA EVITAR CONFUSIÓN
         st.warning("⚠️ **ATENCIÓN:** El equipo de la entrada principal debe colocarse **ANTES** de la bomba presurizadora.")
 
     # --- BOTONES DE ACCIÓN ---
