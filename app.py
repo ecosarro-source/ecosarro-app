@@ -4,39 +4,51 @@ import urllib.parse
 # Configuración de página
 st.set_page_config(page_title="EcoSarro - Diagnóstico", page_icon="💧", layout="centered")
 
-# --- ESTILO VISUAL (DARK MODE + BOTONES PERSONALIZADOS) ---
+# --- ESTILO VISUAL (LIGHT MODE / FONDO BLANCO) ---
 st.markdown("""
     <style>
-    /* 1. FONDO NEGRO */
+    /* 1. FONDO BLANCO GLOBAL */
     .stApp {
-        background-color: #0E1117;
-        color: #FFFFFF;
+        background-color: #FFFFFF;
+        color: #333333;
     }
     
     /* 2. TÍTULO AZUL GRANDE */
     .title-ecosarro {
         color: #0044CC !important;
         text-align: center;
-        font-size: 3.5rem !important; /* Más grande */
+        font-size: 3.5rem !important;
         font-weight: 800 !important;
         margin-bottom: 0px;
+        padding-bottom: 0px;
     }
     
-    /* 3. SUBTÍTULO BLANCO CHICO */
+    /* 3. SUBTÍTULO GRIS OSCURO (Pegado a la línea) */
     .subtitle-ecosarro {
-        color: #FFFFFF !important;
+        color: #555555 !important;
         text-align: center;
         font-size: 1.2rem !important;
-        font-weight: 300;
-        margin-top: -10px;
-        margin-bottom: 30px;
-        opacity: 0.9;
+        font-weight: 400;
+        margin-top: -5px;
+        margin-bottom: 10px; /* Menos espacio antes de la línea */
+    }
+
+    /* TEXTOS GENERALES EN NEGRO */
+    h2, h3, p, label, .stMarkdown {
+        color: #000000 !important;
+    }
+    
+    /* LÍNEA DIVISORIA (HR) */
+    hr {
+        margin-top: 0px;
+        margin-bottom: 20px;
+        border-color: #eeeeee;
     }
 
     /* ESTILOS DE BOTONES */
     a { text-decoration: none !important; }
 
-    /* Botón WhatsApp (Verde con Icono) */
+    /* Botón WhatsApp (Verde Sólido) */
     .whatsapp-btn {
         background-color: #25D366;
         color: white !important;
@@ -48,24 +60,24 @@ st.markdown("""
         gap: 10px;
         font-weight: bold;
         font-size: 18px;
-        box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         transition: transform 0.2s;
         margin-top: 20px;
     }
     .whatsapp-btn:hover {
         transform: scale(1.02);
         background-color: #1DA851;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
 
-    /* Botón YouTube (Vertical: Icono arriba, texto abajo) */
+    /* Botón YouTube (Rojo con texto blanco para contraste) */
     .youtube-btn {
-        background-color: transparent;
-        border: 2px solid #FF0000;
+        background-color: #FF0000;
         color: white !important;
         padding: 10px 20px;
         border-radius: 15px;
         display: flex;
-        flex-direction: column; /* Icono arriba, texto abajo */
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         gap: 5px;
@@ -73,23 +85,30 @@ st.markdown("""
         font-weight: 600;
         margin-top: 15px;
         transition: background-color 0.3s;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .youtube-btn:hover {
-        background-color: rgba(255, 0, 0, 0.1);
+        background-color: #CC0000;
     }
     
     /* Ajuste del botón nativo de Streamlit (Calcular) */
     .stButton>button {
         background-color: #0044CC;
-        color: white;
+        color: white !important;
         border-radius: 8px;
         border: none;
         height: 3em;
         font-weight: bold;
         width: 100%;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .stButton>button:hover {
         background-color: #0033A0;
+    }
+    
+    /* Ajuste de inputs para que se vean bien en blanco */
+    .stSelectbox, .stNumberInput, .stRadio {
+        color: #000000;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -109,7 +128,8 @@ mapa_dureza = {
 }
 
 # --- ENTRADA DE DATOS ---
-st.markdown("---")
+st.markdown("---") # Línea divisoria (Ahora más pegada al título)
+
 zona = st.selectbox("Selecciona tu Provincia/Zona", sorted(list(mapa_dureza.keys())))
 
 col1, col2 = st.columns(2)
@@ -118,10 +138,11 @@ with col1:
     bomba = st.checkbox("Tengo Bomba Presurizadora")
 
 with col2:
-    personas = st.number_input("Personas en la casa", min_value=1, max_value=50, value=4)
+    # AHORA LIMITADO A 10 PERSONAS
+    personas = st.number_input("Personas en la casa", min_value=1, max_value=10, value=4)
     calentador = st.selectbox("Calentamiento de agua", ["Termotanque", "Calefón"])
 
-# --- LÓGICA DE CÁLCULO CORREGIDA ---
+# --- LÓGICA DE CÁLCULO ---
 st.write("") # Espacio
 if st.button("CALCULAR MI PLAN"):
     puntaje = mapa_dureza[zona]
@@ -138,8 +159,8 @@ if st.button("CALCULAR MI PLAN"):
         equipos += 1
         detalles.append("🔹 1 Equipo de Refuerzo en la bajada del tanque (Requerido por Dureza Alta).")
         
-    # 2. REFUERZO POR CONSUMO (Mucha gente) - ¡AHORA SUMA SIEMPRE!
-    # Antes se bloqueaba si la dureza era alta. Ahora es un 'if' independiente.
+    # 2. REFUERZO POR CONSUMO (Mucha gente)
+    # Regla: Si son 6 o más personas (hasta el tope de 10), se considera alto consumo.
     if personas >= 6:
         equipos += 1
         detalles.append(f"🔹 1 Equipo Extra por alto caudal de consumo (+{personas} personas).")
@@ -151,6 +172,9 @@ if st.button("CALCULAR MI PLAN"):
 
     # --- MOSTRAR RESULTADOS ---
     st.markdown("---")
+    
+    # Usamos st.success pero como el texto es blanco por defecto en success, forzamos estilo si hace falta, 
+    # aunque en light mode de streamlit st.success se ve verde con texto oscuro o blanco legible.
     st.success(f"### Resultado: Necesitas {equipos} Equipos")
     
     for d in detalles:
@@ -165,7 +189,7 @@ if st.button("CALCULAR MI PLAN"):
     msg = f"Hola EcoSarro! Mi diagnóstico para {zona} ({personas} personas) dio {equipos} equipos. ¿Me podrían asesorar?"
     msg_url = urllib.parse.quote(msg)
     
-    # 1. BOTÓN WHATSAPP (Verde con Icono)
+    # 1. BOTÓN WHATSAPP
     st.markdown(f"""
         <a href="https://wa.me/5493515190658?text={msg_url}" class="whatsapp-btn" target="_blank">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
@@ -175,10 +199,10 @@ if st.button("CALCULAR MI PLAN"):
         </a>
     """, unsafe_allow_html=True)
 
-    # 2. BOTÓN YOUTUBE (Icono arriba, texto abajo)
+    # 2. BOTÓN YOUTUBE
     st.markdown("""
         <a href="https://www.youtube.com/@EcoSarro" class="youtube-btn" target="_blank">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="red" xmlns="http://www.w3.org/2000/svg">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
                 <path d="M23.498 6.186C23.221 5.145 22.404 4.328 21.363 4.051C19.479 3.549 12 3.549 12 3.549C12 3.549 4.521 3.549 2.637 4.051C1.596 4.328 0.779 5.145 0.502 6.186C0 8.07 0 12 0 12C0 12 0 15.93 0.502 17.814C0.779 18.855 1.596 19.672 2.637 19.949C4.521 20.451 12 20.451 12 20.451C12 20.451 19.479 20.451 21.363 19.949C22.404 19.672 23.221 18.855 23.498 17.814C24 15.93 24 12 24 12C24 12 24 8.07 23.498 6.186ZM9.545 15.568V8.432L15.818 12L9.545 15.568Z"/>
             </svg>
             Videos de instalación
