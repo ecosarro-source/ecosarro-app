@@ -4,7 +4,7 @@ import urllib.parse
 # Configuración de página
 st.set_page_config(page_title="EcoSarro - Diagnóstico", page_icon="💧", layout="centered")
 
-# --- ESTILO VISUAL (LIGHT MODE / FONDO BLANCO) ---
+# --- ESTILO VISUAL (LIGHT MODE) ---
 st.markdown("""
     <style>
     /* 1. FONDO BLANCO GLOBAL */
@@ -13,9 +13,9 @@ st.markdown("""
         color: #333333;
     }
     
-    /* 2. TÍTULO AZUL NAVAL (NUEVO COLOR) */
+    /* 2. TÍTULO AZUL NAVAL */
     .title-ecosarro {
-        color: #1d4e89 !important; /* Color solicitado */
+        color: #1d4e89 !important;
         text-align: center;
         font-size: 3.5rem !important;
         font-weight: 800 !important;
@@ -23,7 +23,7 @@ st.markdown("""
         padding-bottom: 0px;
     }
     
-    /* 3. SUBTÍTULO GRIS OSCURO */
+    /* 3. SUBTÍTULO */
     .subtitle-ecosarro {
         color: #555555 !important;
         text-align: center;
@@ -34,21 +34,42 @@ st.markdown("""
     }
 
     /* TEXTOS GENERALES EN NEGRO */
-    h2, h3, p, label, .stMarkdown {
+    h2, h3, p, label, .stMarkdown, .stRadio label, .stCheckbox label {
         color: #000000 !important;
     }
     
-    /* LÍNEA DIVISORIA (NEGRA) */
+    /* LÍNEA DIVISORIA NEGRA */
     hr {
         margin-top: 0px;
         margin-bottom: 20px;
-        border-top: 2px solid #000000 !important; /* Línea negra sólida */
+        border-top: 2px solid #000000 !important;
     }
 
-    /* ESTILOS DE BOTONES */
+    /* --- BOTÓN CALCULAR (CELESTE Y CENTRADO) --- */
+    .stButton {
+        display: flex;
+        justify-content: center;
+    }
+    .stButton>button {
+        background-color: #3399FF !important; /* Celeste Vibrante */
+        color: white !important; /* Letra Blanca para contraste */
+        border-radius: 12px;
+        border: none;
+        height: 3.5em;
+        font-weight: 900 !important; /* Negrita Extra */
+        font-size: 18px !important;
+        width: 70% !important; /* Ancho controlado (no ocupa todo, pero es ancho) */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        background-color: #1a80e5 !important;
+        transform: scale(1.02);
+    }
+
+    /* BOTONES DE ACCIÓN (WhatsApp y YouTube) */
     a { text-decoration: none !important; }
 
-    /* Botón WhatsApp (Verde Sólido) */
     .whatsapp-btn {
         background-color: #25D366;
         color: white !important;
@@ -67,10 +88,8 @@ st.markdown("""
     .whatsapp-btn:hover {
         transform: scale(1.02);
         background-color: #1DA851;
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
 
-    /* Botón YouTube */
     .youtube-btn {
         background-color: #FF0000;
         color: white !important;
@@ -91,21 +110,6 @@ st.markdown("""
         background-color: #CC0000;
     }
     
-    /* Ajuste del botón nativo de Streamlit (Calcular) */
-    .stButton>button {
-        background-color: #1d4e89; /* Mismo azul que el título */
-        color: white !important;
-        border-radius: 8px;
-        border: none;
-        height: 3em;
-        font-weight: bold;
-        width: 100%;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .stButton>button:hover {
-        background-color: #153a66;
-    }
-    
     /* Ajuste de inputs */
     .stSelectbox, .stNumberInput, .stRadio, .stCheckbox {
         color: #000000;
@@ -117,7 +121,7 @@ st.markdown("""
 st.markdown('<h1 class="title-ecosarro">EcoSarro</h1>', unsafe_allow_html=True)
 st.markdown('<p class="subtitle-ecosarro">Asistente de cálculo de equipos para el hogar</p>', unsafe_allow_html=True)
 
-# Base de datos de provincias (Dureza 1 a 10)
+# Base de datos
 mapa_dureza = {
     "Buenos Aires (Costa Atlántica)": 10, "Buenos Aires (Bahía Blanca/Sur)": 10, "Buenos Aires (GBA)": 8,
     "Buenos Aires (Interior)": 8, "CABA": 6, "Catamarca": 9, "Chaco": 7, "Chubut": 3, "Córdoba": 9,
@@ -128,54 +132,55 @@ mapa_dureza = {
 }
 
 # --- ENTRADA DE DATOS ---
-st.markdown("---") # Línea divisoria NEGRA
+st.markdown("---") 
 
 zona = st.selectbox("Selecciona tu Provincia/Zona", sorted(list(mapa_dureza.keys())))
 
 col1, col2 = st.columns(2)
 with col1:
     origen = st.radio("Origen del agua", ["Red", "Pozo/Napa"])
-    st.write("") # Espacio visual
+    st.write("") 
     bomba = st.checkbox("Tengo Bomba Presurizadora")
-    piscina = st.checkbox("Tengo Piscina con Filtro") # NUEVA OPCIÓN
+    piscina = st.checkbox("Tengo Piscina con Filtro")
 
 with col2:
     personas = st.number_input("Personas en la casa", min_value=1, max_value=10, value=4)
     calentador = st.selectbox("Calentamiento de agua", ["Termotanque", "Calefón"])
 
-# --- LÓGICA DE CÁLCULO ---
+# --- CÁLCULO ---
 st.write("")
+st.write("") # Espacio extra antes del botón
 if st.button("CALCULAR MI PLAN"):
     puntaje = mapa_dureza[zona]
     if origen == "Pozo/Napa":
         puntaje += 2
     
-    puntaje = min(puntaje, 10) # Tope máximo 10
+    puntaje = min(puntaje, 10)
     
-    equipos = 1 # Base siempre 1
+    equipos = 1
     detalles = ["🔹 1 Equipo en la entrada principal (subida al tanque o entrada de calle)."]
     
-    # 1. REFUERZO POR DUREZA (Agua muy dura)
+    # 1. Dureza
     if puntaje >= 8:
         equipos += 1
         detalles.append("🔹 1 Equipo de Refuerzo en la bajada del tanque (Requerido por Dureza Alta).")
         
-    # 2. REFUERZO POR CONSUMO (Mucha gente)
+    # 2. Consumo
     if personas >= 6:
         equipos += 1
         detalles.append(f"🔹 1 Equipo Extra por alto caudal de consumo (+{personas} personas).")
 
-    # 3. REFUERZO CALEFÓN
+    # 3. Calefón
     if calentador == "Calefón" and puntaje >= 7:
         equipos += 1
         detalles.append("🔹 1 Equipo de Refuerzo exclusivo en la entrada de agua fría del Calefón.")
 
-    # 4. PISCINA (NUEVO CÁLCULO)
+    # 4. Piscina
     if piscina:
         equipos += 1
         detalles.append("🔹 1 Equipo exclusivo para el retorno del filtro de la piscina.")
 
-    # --- MOSTRAR RESULTADOS ---
+    # --- RESULTADOS ---
     st.markdown("---")
     
     st.success(f"### Resultado: Necesitas {equipos} Equipos")
@@ -184,11 +189,10 @@ if st.button("CALCULAR MI PLAN"):
         st.info(d)
         
     if bomba:
-        st.warning("⚠️ Instalar SIEMPRE 1 equipo ANTES de la bomba presurizadora.")
+        # MENSAJE CORREGIDO PARA EVITAR CONFUSIÓN
+        st.warning("⚠️ **ATENCIÓN:** El equipo de la entrada principal debe colocarse **ANTES** de la bomba presurizadora.")
 
     # --- BOTONES DE ACCIÓN ---
-    
-    # Mensaje de WhatsApp (Incluye info de piscina si aplica)
     msg = f"Hola EcoSarro! Mi diagnóstico para {zona} ({personas} personas) dio {equipos} equipos."
     if piscina:
         msg += " (Tengo Piscina)."
@@ -196,7 +200,7 @@ if st.button("CALCULAR MI PLAN"):
     
     msg_url = urllib.parse.quote(msg)
     
-    # 1. BOTÓN WHATSAPP
+    # WhatsApp
     st.markdown(f"""
         <a href="https://wa.me/5493515190658?text={msg_url}" class="whatsapp-btn" target="_blank">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
@@ -206,7 +210,7 @@ if st.button("CALCULAR MI PLAN"):
         </a>
     """, unsafe_allow_html=True)
 
-    # 2. BOTÓN YOUTUBE
+    # YouTube
     st.markdown("""
         <a href="https://www.youtube.com/@EcoSarro" class="youtube-btn" target="_blank">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
