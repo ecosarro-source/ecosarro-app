@@ -13,9 +13,9 @@ st.markdown("""
         color: #333333;
     }
     
-    /* 2. TÍTULO AZUL GRANDE */
+    /* 2. TÍTULO AZUL NAVAL (NUEVO COLOR) */
     .title-ecosarro {
-        color: #0044CC !important;
+        color: #1d4e89 !important; /* Color solicitado */
         text-align: center;
         font-size: 3.5rem !important;
         font-weight: 800 !important;
@@ -23,14 +23,14 @@ st.markdown("""
         padding-bottom: 0px;
     }
     
-    /* 3. SUBTÍTULO GRIS OSCURO (Pegado a la línea) */
+    /* 3. SUBTÍTULO GRIS OSCURO */
     .subtitle-ecosarro {
         color: #555555 !important;
         text-align: center;
         font-size: 1.2rem !important;
         font-weight: 400;
         margin-top: -5px;
-        margin-bottom: 10px; /* Menos espacio antes de la línea */
+        margin-bottom: 10px;
     }
 
     /* TEXTOS GENERALES EN NEGRO */
@@ -38,11 +38,11 @@ st.markdown("""
         color: #000000 !important;
     }
     
-    /* LÍNEA DIVISORIA (HR) */
+    /* LÍNEA DIVISORIA (NEGRA) */
     hr {
         margin-top: 0px;
         margin-bottom: 20px;
-        border-color: #eeeeee;
+        border-top: 2px solid #000000 !important; /* Línea negra sólida */
     }
 
     /* ESTILOS DE BOTONES */
@@ -70,7 +70,7 @@ st.markdown("""
         box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
 
-    /* Botón YouTube (Rojo con texto blanco para contraste) */
+    /* Botón YouTube */
     .youtube-btn {
         background-color: #FF0000;
         color: white !important;
@@ -93,7 +93,7 @@ st.markdown("""
     
     /* Ajuste del botón nativo de Streamlit (Calcular) */
     .stButton>button {
-        background-color: #0044CC;
+        background-color: #1d4e89; /* Mismo azul que el título */
         color: white !important;
         border-radius: 8px;
         border: none;
@@ -103,11 +103,11 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .stButton>button:hover {
-        background-color: #0033A0;
+        background-color: #153a66;
     }
     
-    /* Ajuste de inputs para que se vean bien en blanco */
-    .stSelectbox, .stNumberInput, .stRadio {
+    /* Ajuste de inputs */
+    .stSelectbox, .stNumberInput, .stRadio, .stCheckbox {
         color: #000000;
     }
     </style>
@@ -128,22 +128,23 @@ mapa_dureza = {
 }
 
 # --- ENTRADA DE DATOS ---
-st.markdown("---") # Línea divisoria (Ahora más pegada al título)
+st.markdown("---") # Línea divisoria NEGRA
 
 zona = st.selectbox("Selecciona tu Provincia/Zona", sorted(list(mapa_dureza.keys())))
 
 col1, col2 = st.columns(2)
 with col1:
     origen = st.radio("Origen del agua", ["Red", "Pozo/Napa"])
+    st.write("") # Espacio visual
     bomba = st.checkbox("Tengo Bomba Presurizadora")
+    piscina = st.checkbox("Tengo Piscina con Filtro") # NUEVA OPCIÓN
 
 with col2:
-    # AHORA LIMITADO A 10 PERSONAS
     personas = st.number_input("Personas en la casa", min_value=1, max_value=10, value=4)
     calentador = st.selectbox("Calentamiento de agua", ["Termotanque", "Calefón"])
 
 # --- LÓGICA DE CÁLCULO ---
-st.write("") # Espacio
+st.write("")
 if st.button("CALCULAR MI PLAN"):
     puntaje = mapa_dureza[zona]
     if origen == "Pozo/Napa":
@@ -160,21 +161,23 @@ if st.button("CALCULAR MI PLAN"):
         detalles.append("🔹 1 Equipo de Refuerzo en la bajada del tanque (Requerido por Dureza Alta).")
         
     # 2. REFUERZO POR CONSUMO (Mucha gente)
-    # Regla: Si son 6 o más personas (hasta el tope de 10), se considera alto consumo.
     if personas >= 6:
         equipos += 1
         detalles.append(f"🔹 1 Equipo Extra por alto caudal de consumo (+{personas} personas).")
 
-    # 3. REFUERZO CALEFÓN (Específico para serpentina)
+    # 3. REFUERZO CALEFÓN
     if calentador == "Calefón" and puntaje >= 7:
         equipos += 1
         detalles.append("🔹 1 Equipo de Refuerzo exclusivo en la entrada de agua fría del Calefón.")
 
+    # 4. PISCINA (NUEVO CÁLCULO)
+    if piscina:
+        equipos += 1
+        detalles.append("🔹 1 Equipo exclusivo para el retorno del filtro de la piscina.")
+
     # --- MOSTRAR RESULTADOS ---
     st.markdown("---")
     
-    # Usamos st.success pero como el texto es blanco por defecto en success, forzamos estilo si hace falta, 
-    # aunque en light mode de streamlit st.success se ve verde con texto oscuro o blanco legible.
     st.success(f"### Resultado: Necesitas {equipos} Equipos")
     
     for d in detalles:
@@ -185,8 +188,12 @@ if st.button("CALCULAR MI PLAN"):
 
     # --- BOTONES DE ACCIÓN ---
     
-    # Mensaje de WhatsApp
-    msg = f"Hola EcoSarro! Mi diagnóstico para {zona} ({personas} personas) dio {equipos} equipos. ¿Me podrían asesorar?"
+    # Mensaje de WhatsApp (Incluye info de piscina si aplica)
+    msg = f"Hola EcoSarro! Mi diagnóstico para {zona} ({personas} personas) dio {equipos} equipos."
+    if piscina:
+        msg += " (Tengo Piscina)."
+    msg += " ¿Me podrían asesorar?"
+    
     msg_url = urllib.parse.quote(msg)
     
     # 1. BOTÓN WHATSAPP
