@@ -4,7 +4,7 @@ import urllib.parse
 # Configuración de página
 st.set_page_config(page_title="EcoSarro - Diagnóstico", page_icon="💧", layout="centered")
 
-# --- ESTILO VISUAL (LIGHT MODE) ---
+# --- ESTILO VISUAL (CORRECCIÓN FINAL BOTÓN Y INPUTS) ---
 st.markdown("""
     <style>
     /* 1. FONDO BLANCO GLOBAL */
@@ -17,7 +17,7 @@ st.markdown("""
     .title-ecosarro {
         color: #1d4e89 !important;
         text-align: center;
-        font-size: 3.5rem !important;
+        font-size: 3rem !important;
         font-weight: 800 !important;
         margin-bottom: 0px;
         padding-bottom: 0px;
@@ -27,14 +27,14 @@ st.markdown("""
     .subtitle-ecosarro {
         color: #555555 !important;
         text-align: center;
-        font-size: 1.2rem !important;
+        font-size: 1.1rem !important;
         font-weight: 400;
         margin-top: -5px;
         margin-bottom: 10px;
     }
 
     /* TEXTOS GENERALES EN NEGRO */
-    h2, h3, p, label, .stMarkdown, .stRadio label, .stCheckbox label {
+    h2, h3, p, label, .stMarkdown, div[data-testid="stMarkdownContainer"] p {
         color: #000000 !important;
     }
     
@@ -45,28 +45,25 @@ st.markdown("""
         border-top: 2px solid #000000 !important;
     }
 
-    /* --- BOTÓN CALCULAR (CORREGIDO) --- */
-    /* Centrar el contenedor del botón */
-    div.stButton {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-    }
-    
-    /* Estilo del botón mismo */
+    /* --- CORRECCIÓN FINAL DEL BOTÓN CALCULAR --- */
     div.stButton > button {
         background-color: #3399FF !important; /* Celeste Vibrante */
-        color: white !important;
+        color: #000000 !important; /* Letra Negra (para mejor lectura) o White si prefieres */
         border-radius: 12px;
         border: none;
-        height: 3.5em;
+        height: auto !important; /* Altura automática para que se adapte */
+        padding-top: 15px !important;
+        padding-bottom: 15px !important;
         font-weight: 900 !important; /* Negrita Extra */
         font-size: 18px !important;
+        text-transform: uppercase; /* Todo mayúsculas queda mejor */
         
-        /* CORRECCIONES DE ANCHO Y TEXTO */
-        width: 90% !important; /* Ocupa el 90% del ancho (más ancho) */
-        max-width: 500px; /* Tope para que no se vea gigante en PC */
-        white-space: nowrap !important; /* OBLIGA a que el texto esté en una sola línea */
+        /* LA CLAVE PARA QUE NO SE ROMPA */
+        width: 100% !important;
+        white-space: nowrap !important; /* PROHIBIDO SALTAR DE LÍNEA */
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
         
         box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         transition: all 0.3s ease;
@@ -74,6 +71,20 @@ st.markdown("""
     div.stButton > button:hover {
         background-color: #1a80e5 !important;
         transform: scale(1.02);
+        color: white !important;
+    }
+    
+    /* FORZAR INPUTS BLANCOS (Arreglo visual de cajas oscuras) */
+    div[data-baseweb="select"] > div, div[data-baseweb="base-input"] {
+        background-color: #F0F2F6 !important;
+        border: 1px solid #ddd !important;
+        color: black !important;
+    }
+    div[data-baseweb="select"] span {
+        color: black !important;
+    }
+    input {
+        color: black !important;
     }
 
     /* BOTONES DE ACCIÓN (WhatsApp y YouTube) */
@@ -118,11 +129,6 @@ st.markdown("""
     .youtube-btn:hover {
         background-color: #CC0000;
     }
-    
-    /* Ajuste de inputs */
-    .stSelectbox, .stNumberInput, .stRadio, .stCheckbox {
-        color: #000000;
-    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -158,8 +164,10 @@ with col2:
 
 # --- CÁLCULO ---
 st.write("")
-st.write("") # Espacio extra
-if st.button("CALCULAR MI PLAN"):
+st.write("") 
+
+# AQUÍ ESTÁ LA SOLUCIÓN NATIVA PARA EL ANCHO
+if st.button("CALCULAR MI PLAN", use_container_width=True):
     puntaje = mapa_dureza[zona]
     if origen == "Pozo/Napa":
         puntaje += 2
@@ -192,12 +200,18 @@ if st.button("CALCULAR MI PLAN"):
     # --- RESULTADOS ---
     st.markdown("---")
     
-    st.success(f"### Resultado: Necesitas {equipos} Equipos")
+    # Usamos un contenedor verde claro personalizado para el resultado
+    st.markdown(f"""
+        <div style="background-color: #d1fae5; padding: 20px; border-radius: 10px; border-left: 5px solid #10b981; margin-bottom: 20px;">
+            <h3 style="color: #064e3b !important; margin: 0;">Resultado: Necesitas {equipos} Equipos</h3>
+        </div>
+    """, unsafe_allow_html=True)
     
     for d in detalles:
         st.info(d)
         
     if bomba:
+        # MENSAJE DE ADVERTENCIA CLARO
         st.warning("⚠️ **ATENCIÓN:** El equipo de la entrada principal debe colocarse **ANTES** de la bomba presurizadora.")
 
     # --- BOTONES DE ACCIÓN ---
