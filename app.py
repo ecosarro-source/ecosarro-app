@@ -4,8 +4,10 @@ import urllib.parse
 # Configuración de página
 st.set_page_config(page_title="EcoSarro - Diagnóstico", page_icon="💧", layout="centered")
 
-# --- ESTILO VISUAL (CORRECCIÓN FINAL BOTÓN Y INPUTS) ---
+# --- ESTILO VISUAL Y BLOQUEO DE TRADUCCIÓN ---
 st.markdown("""
+    <meta name="google" content="notranslate" />
+    
     <style>
     /* 1. FONDO BLANCO GLOBAL */
     .stApp {
@@ -45,22 +47,21 @@ st.markdown("""
         border-top: 2px solid #000000 !important;
     }
 
-    /* --- CORRECCIÓN FINAL DEL BOTÓN CALCULAR --- */
+    /* --- BOTÓN CALCULAR --- */
     div.stButton > button {
-        background-color: #3399FF !important; /* Celeste Vibrante */
-        color: #000000 !important; /* Letra Negra (para mejor lectura) o White si prefieres */
+        background-color: #3399FF !important;
+        color: #000000 !important;
         border-radius: 12px;
         border: none;
-        height: auto !important; /* Altura automática para que se adapte */
+        height: auto !important;
         padding-top: 15px !important;
         padding-bottom: 15px !important;
-        font-weight: 900 !important; /* Negrita Extra */
+        font-weight: 900 !important;
         font-size: 18px !important;
-        text-transform: uppercase; /* Todo mayúsculas queda mejor */
+        text-transform: uppercase;
         
-        /* LA CLAVE PARA QUE NO SE ROMPA */
         width: 100% !important;
-        white-space: nowrap !important; /* PROHIBIDO SALTAR DE LÍNEA */
+        white-space: nowrap !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
@@ -74,7 +75,7 @@ st.markdown("""
         color: white !important;
     }
     
-    /* FORZAR INPUTS BLANCOS (Arreglo visual de cajas oscuras) */
+    /* FORZAR INPUTS BLANCOS */
     div[data-baseweb="select"] > div, div[data-baseweb="base-input"] {
         background-color: #F0F2F6 !important;
         border: 1px solid #ddd !important;
@@ -153,7 +154,8 @@ zona = st.selectbox("Selecciona tu Provincia/Zona", sorted(list(mapa_dureza.keys
 
 col1, col2 = st.columns(2)
 with col1:
-    origen = st.radio("Origen del agua", ["Red", "Pozo/Napa"])
+    # CAMBIO IMPORTANTE: "Agua de Red" en vez de "Red" para evitar traducción a "Rojo"
+    origen = st.radio("Origen del agua", ["Agua de Red", "Pozo/Napa"])
     st.write("") 
     bomba = st.checkbox("Tengo Bomba Presurizadora")
     piscina = st.checkbox("Tengo Piscina con Filtro")
@@ -166,7 +168,6 @@ with col2:
 st.write("")
 st.write("") 
 
-# AQUÍ ESTÁ LA SOLUCIÓN NATIVA PARA EL ANCHO
 if st.button("CALCULAR MI PLAN", use_container_width=True):
     puntaje = mapa_dureza[zona]
     if origen == "Pozo/Napa":
@@ -200,7 +201,7 @@ if st.button("CALCULAR MI PLAN", use_container_width=True):
     # --- RESULTADOS ---
     st.markdown("---")
     
-    # Usamos un contenedor verde claro personalizado para el resultado
+    # Contenedor verde claro personalizado para el resultado
     st.markdown(f"""
         <div style="background-color: #d1fae5; padding: 20px; border-radius: 10px; border-left: 5px solid #10b981; margin-bottom: 20px;">
             <h3 style="color: #064e3b !important; margin: 0;">Resultado: Necesitas {equipos} Equipos</h3>
@@ -211,7 +212,6 @@ if st.button("CALCULAR MI PLAN", use_container_width=True):
         st.info(d)
         
     if bomba:
-        # MENSAJE DE ADVERTENCIA CLARO
         st.warning("⚠️ **ATENCIÓN:** El equipo de la entrada principal debe colocarse **ANTES** de la bomba presurizadora.")
 
     # --- BOTONES DE ACCIÓN ---
